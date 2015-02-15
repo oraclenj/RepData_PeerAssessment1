@@ -1,16 +1,10 @@
----
-
-title: " reproducible research exercise 1"
-author: "oraclenj"
-output:
- html_document:
-  keep_md: true
-  self_contained: no
----
+#  reproducible research exercise 1
+oraclenj  
 
 **Loading and preprocessing the data**
 
-```{r load}
+
+```r
 library(ggplot2)
 #library(scales)
 library(lattice)
@@ -20,7 +14,6 @@ activ <- read.csv('activity.csv',header=TRUE)
 activstep <- activ[complete.cases(activ[,1]),]
 
 sumbyday <- aggregate(steps ~ date, activstep, sum)
-
 ```
 
 **What is mean total number of steps taken per day?**
@@ -30,17 +23,30 @@ sumbyday <- aggregate(steps ~ date, activstep, sum)
 
 2.Calculate and report the mean and median total number of steps taken per day
 
-```{r steps}
 
+```r
 hist(sumbyday$steps,breaks=20,ylab="number of steps",xlab="number of days",main="total number of steps per day, ignoring missing values")
+```
 
+![](peer_assessment_1_files/figure-html/steps-1.png) 
 
+```r
 namean <- mean(sumbyday$steps)
 namedian <- median(sumbyday$steps)
 
 cat("mean with nulls removed is ",namean)
-cat("median with nulls removed is ",namedian)
+```
 
+```
+## mean with nulls removed is  10766.19
+```
+
+```r
+cat("median with nulls removed is ",namedian)
+```
+
+```
+## median with nulls removed is  10765
 ```
 
 **What is the average daily activity pattern?**
@@ -54,19 +60,26 @@ cat("median with nulls removed is ",namedian)
 x-axis is the 5-minute interval  
 y-axis is the average number of steps taken per day  
 
-```{r time series}
 
+```r
 stepmean <- aggregate(steps ~ interval, activ, mean)
 stepmean$intnum <- rownames(stepmean)
 
 plot(stepmean$intnum, stepmean$steps, type="l", xlab= "5-minute interval of the day", ylab= "steps", col="green" , lwd=2)
+```
 
+![](peer_assessment_1_files/figure-html/time series-1.png) 
+
+```r
 maxmean <- round(max(stepmean$steps))
 
 maxinterval <- which.max(stepmean$steps)
 
 cat ("the 5-minute interval with the greatest average number of steps is ", maxinterval, " with ",maxmean," steps")
+```
 
+```
+## the 5-minute interval with the greatest average number of steps is  104  with  206  steps
 ```
 
 **Imputing missing values**
@@ -85,15 +98,30 @@ cat ("the 5-minute interval with the greatest average number of steps is ", maxi
 4.Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
-```{r na part 1}
 
+```r
 cat("There are ",length(which(is.na(activ$steps)))," rows with missing values, out of ",nrow(activ)," total rows")
+```
 
 ```
-```{r na parts 2 & 3}
+## There are  2304  rows with missing values, out of  17568  total rows
+```
 
+```r
 activnonulls <- merge(activ,stepmean,"interval")
 str(activnonulls)
+```
+
+```
+## 'data.frame':	17568 obs. of  5 variables:
+##  $ interval: int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ steps.x : int  NA 0 0 0 0 0 0 0 0 0 ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 54 28 37 55 46 20 47 38 56 ...
+##  $ steps.y : num  1.72 1.72 1.72 1.72 1.72 ...
+##  $ intnum  : chr  "1" "1" "1" "1" ...
+```
+
+```r
 whatsnull <- is.na(activnonulls$steps.x)
 
 
@@ -101,24 +129,54 @@ activnonulls$steps.x[whatsnull] <- activnonulls$steps.y[whatsnull]
 
 
 cat("There are now ",length(which(is.na(activnonulls$steps.x)))," rows with missing values, out of ",nrow(activnonulls)," total rows")
-
 ```
 
-```{r na part 4}
+```
+## There are now  0  rows with missing values, out of  17568  total rows
+```
 
+
+```r
 sumbydaynonulls <- aggregate(steps.x ~ date, activnonulls, sum)
 
 hist(sumbydaynonulls$steps.x,breaks=20,main='total number of steps per day with missing values filled in',ylab="number of steps",xlab="number of days")
+```
 
+![](peer_assessment_1_files/figure-html/na part 4-1.png) 
+
+```r
 filledmean <- mean(sumbydaynonulls$steps)
 filledmedian <- median(sumbydaynonulls$steps)
 
 cat("mean with imputed values for nulls is ",filledmean)
+```
+
+```
+## mean with imputed values for nulls is  10766.19
+```
+
+```r
 cat("median with imputed values for nulls is ",filledmedian)
+```
 
+```
+## median with imputed values for nulls is  10766.19
+```
+
+```r
 cat("the the mean with imputed values for nulls minus the mean with nulls removed is ",filledmean - namean)
-cat("the the median with imputed values for nulls minus the median with nulls removed is ",filledmedian - namedian)
+```
 
+```
+## the the mean with imputed values for nulls minus the mean with nulls removed is  0
+```
+
+```r
+cat("the the median with imputed values for nulls minus the median with nulls removed is ",filledmedian - namedian)
+```
+
+```
+## the the median with imputed values for nulls minus the median with nulls removed is  1.188679
 ```
 
 **Are there differences in activity patterns between weekdays and weekends?**
@@ -127,8 +185,8 @@ cat("the the median with imputed values for nulls minus the median with nulls re
 
 2.Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
-```{r weekdays}
 
+```r
 activnonulls$daytype <- as.factor(ifelse(weekdays(as.Date(activnonulls$date)) %in% c('Sunday','Saturday'),'weekend','weekday' ))
 
 
@@ -145,7 +203,6 @@ plot(weekendmean$intnum, weekendmean$steps.x, type="l", xlab= "5-minute interval
 
 
 plot(weekdaymean$intnum, weekdaymean$steps.x, type="l", xlab= "5-minute interval of the weekend day", ylab= "steps", col="red" , lwd=2)
-
-
-
 ```
+
+![](peer_assessment_1_files/figure-html/weekdays-1.png) 
